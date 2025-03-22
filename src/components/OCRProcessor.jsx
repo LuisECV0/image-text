@@ -1,11 +1,25 @@
 import React, { useState, useEffect } from "react";
 import Tesseract from "tesseract.js";
 import { FaFileImage, FaPaste } from "react-icons/fa";
+import { DarkModeSwitch } from "react-toggle-dark-mode";
 
 const OCRProcessor = () => {
     const [text, setText] = useState("");
     const [image, setImage] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [isDarkMode, setDarkMode] = useState(
+        localStorage.getItem("darkMode") === "true"
+    );
+
+    useEffect(() => {
+        document.documentElement.setAttribute(
+            "data-theme",
+            isDarkMode ? "dark" : "light"
+        );
+        localStorage.setItem("darkMode", isDarkMode);
+    }, [isDarkMode]);
+
+    const toggleDarkMode = (checked) => setDarkMode(checked);
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
@@ -48,18 +62,23 @@ const OCRProcessor = () => {
 
     return (
         <div className="ocr-processor">
+            <DarkModeSwitch
+                checked={isDarkMode}
+                onChange={toggleDarkMode}
+                size={40}
+                style={{ marginBottom: "10px" }}
+            />
+
             <h2 className="ocr-title">OCR: Extraer Texto de Imagen</h2>
 
-            {/* Botón estilizado sin input visible */}
             <label className="file-label">
                 <FaFileImage size={20} />
                 <span>Seleccionar Imagen</span>
                 <input
                     type="file"
-                    className="file-input"
                     accept="image/*"
                     onChange={handleFileUpload}
-                    style={{ display: "none" }} // 👈 OCULTA el input
+                    style={{ display: "none" }}
                 />
             </label>
 
@@ -78,11 +97,7 @@ const OCRProcessor = () => {
             </button>
 
             <div className="box-text">
-                {text && (
-                    <div className="extracted-text-container">
-                        <p className="extracted-text">{text}</p>
-                    </div>
-                )}
+                {text && <div className="extracted-text-container"><p>{text}</p></div>}
             </div>
         </div>
     );
