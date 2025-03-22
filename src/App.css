@@ -89,6 +89,31 @@ body {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
 }
 
+.language-selector {
+    margin-top: 15px;
+}
+
+.language-selector label {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.language-selector select {
+    margin-left: 10px;
+    padding: 5px;
+    border-radius: var(--border-radius);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--secondary-text);
+    cursor: pointer;
+}
+
+.detected-lang {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+    margin-top: 5px;
+}
+
 @media (max-width: 768px) {
     .ocr-processor {
         width: 95%;

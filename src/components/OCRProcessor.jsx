@@ -2,14 +2,28 @@ import React, { useState, useEffect } from "react";
 import Tesseract from "tesseract.js";
 import { FaFileImage, FaPaste } from "react-icons/fa";
 import { DarkModeSwitch } from "react-toggle-dark-mode";
+import { franc } from "franc-min"; // Detecta idioma
 
 const OCRProcessor = () => {
     const [text, setText] = useState("");
     const [image, setImage] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [detectedLang, setDetectedLang] = useState("");
     const [isDarkMode, setDarkMode] = useState(
         localStorage.getItem("darkMode") === "true"
     );
+    const [selectedLang, setSelectedLang] = useState("spa"); // Español por defecto
+
+    // Lista de idiomas soportados
+    const languages = {
+        eng: "Inglés",
+        spa: "Español",
+        fra: "Francés",
+        deu: "Alemán",
+        ita: "Italiano",
+        por: "Portugués",
+        rus: "Ruso",
+    };
 
     useEffect(() => {
         document.documentElement.setAttribute(
@@ -31,6 +45,7 @@ const OCRProcessor = () => {
         reader.onload = (e) => setImage(e.target.result);
         reader.readAsDataURL(file);
         setText("");
+        setDetectedLang(""); // Resetear idioma detectado
     };
 
     useEffect(() => {
@@ -53,10 +68,14 @@ const OCRProcessor = () => {
         setLoading(true);
         setText("Extrayendo texto...");
 
-        Tesseract.recognize(image, "spa", { logger: (m) => console.log(m) })
+        Tesseract.recognize(image, selectedLang, { logger: (m) => console.log(m) })
             .then(({ data: { text } }) => {
                 setText(text);
                 setLoading(false);
+
+                // Detectar idioma
+                const detected = franc(text);
+                setDetectedLang(languages[detected] || "Desconocido");
             });
     };
 
@@ -86,6 +105,16 @@ const OCRProcessor = () => {
                 <FaPaste size={16} /> También puedes pegar una imagen (Ctrl + V)
             </p>
 
+            {/* Selector de idioma */}
+            <div className="language-selector">
+                <label>Idioma del texto:</label>
+                <select value={selectedLang} onChange={(e) => setSelectedLang(e.target.value)}>
+                    {Object.entries(languages).map(([code, name]) => (
+                        <option key={code} value={code}>{name}</option>
+                    ))}
+                </select>
+            </div>
+
             {image && (
                 <div className="preview-container">
                     <img src={image} alt="Vista previa" className="preview-image" />
@@ -96,8 +125,16 @@ const OCRProcessor = () => {
                 {loading ? "Extrayendo..." : "Extraer Texto"}
             </button>
 
+            {/* Mostrar resultado */}
             <div className="box-text">
-                {text && <div className="extracted-text-container"><p>{text}</p></div>}
+                {text && (
+                    <div className="extracted-text-container">
+                        <p>{text}</p>
+                        {detectedLang && (
+                            <p className="detected-lang">Idioma detectado: <strong>{detectedLang}</strong></p>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
